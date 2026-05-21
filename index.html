@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welfmart - Bisnis Sekolah</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h2 style="color: var(--yellow); text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">Welfmart</h2>
+        <div class="nav-links">
+            <button onclick="showPage('landing')">Home</button>
+            <button onclick="showPage('dashboard')" id="navDashboard" style="display: none;">Belanja</button>
+            <button onclick="showPage('transaction')" id="navTransaction" style="display: none;">Kasir & Keranjang</button>
+            <button onclick="showPage('admin')" id="navAdmin" style="display: none;">Admin CMS</button>
+            <button onclick="showPage('auth')" class="btn-outline" id="navAuth">Login</button>
+            <button onclick="logout()" class="btn-outline" id="navLogout" style="display: none; background-color: #e74c3c; border: none;">Logout</button>
+        </div>
+    </nav>
+
+    <section id="landing" class="page active">
+        <div class="hero">
+            <h1>Selamat Datang di <span style="color: var(--blue);">Welf</span><span style="color: var(--yellow);">mart</span></h1>
+            <p>Solusi transaksi bisnis sekolah yang terintegrasi, cepat, dan modern.</p>
+            <button class="btn-primary" onclick="showPage('auth')" style="font-size: 1.1rem; padding: 12px 30px;">Mulai Sekarang</button>
+        </div>
+    </section>
+
+    <section id="auth" class="page">
+        <div class="card form-container">
+            <h2 style="color: var(--blue);">Login Welfmart</h2>
+            <p style="font-size: 12px; margin-bottom: 15px; color: #666;">Ketik 'admin' untuk CMS, atau nama/Ustadz untuk belanja. (Bisa tekan Enter)</p>
+            <input type="text" id="username" placeholder="Masukkan Nama...">
+            <button class="btn-primary" onclick="login()">Masuk</button>
+            <p id="loginStatus" style="margin-top: 10px; font-weight: bold;"></p>
+        </div>
+    </section>
+
+    <section id="dashboard" class="page">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="color: var(--blue);">Katalog Produk</h2>
+            <button class="btn-yellow" onclick="showPage('transaction')" style="width: auto;">🛒 Lihat Keranjang</button>
+        </div>
+        <div id="product-list" class="grid-container">
+            </div>
+    </section>
+
+    <section id="transaction" class="page">
+        <div class="card form-container" style="max-width: 600px;">
+            <h2 style="color: var(--blue); border-bottom: 2px solid var(--yellow); padding-bottom: 10px;">Keranjang & Kasir</h2>
+            
+            <div id="keranjangContainer" style="margin: 15px 0; max-height: 200px; overflow-y: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid var(--blue);">
+                            <th>Produk</th>
+                            <th>Qty</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelKeranjang">
+                        </tbody>
+                </table>
+            </div>
+            
+            <div style="background: #eef2ff; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                <h3 style="color: var(--blue); margin: 0;">Total Belanja: Rp <span id="textTotalBelanja">0</span></h3>
+            </div>
+            
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="isJamPadat"> 
+                <label for="isJamPadat">Antrean Jam Padat (+Rp 2.000)</label>
+            </div>
+
+            <div class="form-group" style="margin: 15px 0; border: 1px solid var(--blue); padding: 10px; border-radius: 5px; background: #fffaf0;">
+                <label style="font-weight: bold; display: block; margin-bottom: 10px; color: var(--blue);">Metode Pengambilan:</label>
+                <div class="radio-group">
+                    <input type="radio" name="metodeAmbil" id="optAmbilTempat" value="ambil" checked>
+                    <label for="optAmbilTempat">Ambil di Tempat</label>
+                </div>
+                <div class="radio-group" style="margin-top: 5px;">
+                    <input type="radio" name="metodeAmbil" id="optDelivery" value="kirim">
+                    <label for="optDelivery">Pesan Antar (Delivery Order)</label>
+                </div>
+            </div>
+
+            <button class="btn-primary" onclick="prosesTransaksi()">Konfirmasi Pesanan</button>
+            <button class="btn-outline-dark" onclick="kosongkanKeranjang()" style="margin-top: 10px;">Kosongkan Keranjang</button>
+
+            <div id="strukTransaksi" class="struk" style="display: none;">
+                <h3 style="color: var(--blue); text-align: center;">--- Bukti Pesanan ---</h3>
+                <p id="strukDetail"></p>
+            </div>
+        </div>
+    </section>
+
+    <section id="admin" class="page">
+        <div class="card form-container" style="max-width: 600px;">
+            <h2 style="color: var(--blue);">CMS - Kelola Produk</h2>
+            <div style="margin-bottom: 20px; padding: 15px; background: #eef2ff; border-radius: 8px;">
+                <input type="hidden" id="editIndex" value="-1">
+                <input type="text" id="namaProduk" placeholder="Nama Produk">
+                <input type="number" id="hargaProduk" placeholder="Harga Produk (Rp)">
+                <button class="btn-yellow" id="btnSimpanProduk" onclick="simpanProduk()">Tambah Produk</button>
+                <p id="adminStatus" style="color: green; margin-top: 10px; font-weight: bold;"></p>
+            </div>
+            <table style="width: 100%; text-align: left; margin-top: 10px; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--blue);">
+                        <th style="padding: 10px 0;">Nama</th>
+                        <th>Harga</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="adminProductList"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <div id="modalQuantity" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modalProductName" style="color: var(--blue);">Nama Produk</h3>
+            <p style="color: #666;">Harga: Rp <span id="modalProductPrice"></span> / item</p>
+            <div style="margin: 20px 0;">
+                <label style="font-weight: bold;">Jumlah: </label>
+                <input type="number" id="inputQty" value="1" min="1" style="width: 80px; padding: 8px; text-align: center; border: 2px solid var(--yellow); border-radius: 4px; font-weight: bold;">
+            </div>
+            <button class="btn-yellow" onclick="konfirmasiTambah()">Masukkan Keranjang</button>
+            <button class="btn-outline-dark" onclick="closeModal('modalQuantity')">Batal</button>
+        </div>
+    </div>
+
+    <div id="modalNotif" class="modal-overlay">
+        <div class="modal-content" style="border-top: 5px solid var(--yellow);">
+            <div id="notifIcon" class="notif-icon">✅</div>
+            <h3 id="notifTitle" style="color: var(--blue);">Sukses</h3>
+            <p id="notifMessage" style="margin: 15px 0;">Pesan di sini</p>
+            <button class="btn-primary" onclick="closeModal('modalNotif')">Tutup</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
